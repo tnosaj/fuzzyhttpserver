@@ -5,6 +5,8 @@ import (
 	"math/rand"
 	"net/http"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 type Settings struct {
@@ -19,7 +21,7 @@ type FuzzyHTTPServer struct {
 }
 
 func MakeFuzzyHTTPServer(s Settings) FuzzyHTTPServer {
-	return FuzzyHTTPServer{Metrics: RegisterPrometheusMetrics()}
+	return FuzzyHTTPServer{Settings: s, Metrics: RegisterPrometheusMetrics()}
 }
 
 func (f FuzzyHTTPServer) Status(w http.ResponseWriter, r *http.Request) {
@@ -29,6 +31,7 @@ func (f FuzzyHTTPServer) Status(w http.ResponseWriter, r *http.Request) {
 }
 
 func (f FuzzyHTTPServer) Api(w http.ResponseWriter, r *http.Request) {
+	logrus.Debugf("api call %d", f.Settings.Timeout)
 	n := rand.Intn(f.Settings.Timeout * 1000) // n will be between 0 and 10
 	time.Sleep(time.Duration(n) * time.Millisecond)
 	w.Header().Set("Content-Type", "application/json")
